@@ -1,6 +1,8 @@
 package com.andikadeveloper.bankingspring.user.controller;
 
+import com.andikadeveloper.bankingspring.user.model.dto.request.LoginRequest;
 import com.andikadeveloper.bankingspring.user.model.dto.request.RegisterRequest;
+import com.andikadeveloper.bankingspring.user.model.dto.response.LoginResponse;
 import com.andikadeveloper.bankingspring.user.model.dto.response.RegisterResponse;
 import com.andikadeveloper.bankingspring.user.service.contract.AuthService;
 import lombok.AllArgsConstructor;
@@ -18,5 +20,12 @@ public class AuthController {
         RegisterResponse user = userService.register(request);
 
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse response = userService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }
