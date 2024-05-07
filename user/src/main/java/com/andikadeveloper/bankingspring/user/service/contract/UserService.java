@@ -1,11 +1,13 @@
 package com.andikadeveloper.bankingspring.user.service.contract;
 
+import com.andikadeveloper.bankingspring.user.model.dto.request.UpdateUserRequest;
 import com.andikadeveloper.bankingspring.user.model.dto.response.UserResponse;
 
 import java.util.List;
 
 public interface UserService {
-    UserResponse getAuthenticatedUser();
     List<UserResponse> getAllUsers();
-    UserResponse getUserById(Integer id);
+    UserResponse getUserById(Long id);
+    void deleteUserById(Long id);
+    UserResponse updateUserById(Long id, UpdateUserRequest request);
 }

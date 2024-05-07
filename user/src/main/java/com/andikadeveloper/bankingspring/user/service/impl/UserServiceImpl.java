@@ -1,13 +1,12 @@
 package com.andikadeveloper.bankingspring.user.service.impl;
 
+import com.andikadeveloper.bankingspring.user.model.dto.request.UpdateUserRequest;
 import com.andikadeveloper.bankingspring.user.model.dto.response.UserResponse;
 import com.andikadeveloper.bankingspring.user.model.entity.UserEntity;
 import com.andikadeveloper.bankingspring.user.repository.UserRepository;
 import com.andikadeveloper.bankingspring.user.service.contract.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,26 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-
-    @Override
-    public UserResponse getAuthenticatedUser() {
-        log.info("Get authenticated user");
-
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
-        UserEntity currentUser = (UserEntity) authentication.getPrincipal();
-
-        UserResponse response = new UserResponse();
-        response.setId(currentUser.getId());
-        response.setFullName(currentUser.getFullName());
-        response.setEmail(currentUser.getEmail());
-
-        log.info("User: {}", response);
-
-        return response;
-    }
 
     @Override
     public List<UserResponse> getAllUsers() {
@@ -61,15 +40,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getUserById(Integer id) {
+    public UserResponse getUserById(Long id) {
         log.info("Get user by id: {}", id);
 
-        UserEntity user = userRepository.findById(id).orElse(null);
-
-        if (user == null) {
-            log.error("User not found");
-            throw new RuntimeException("User not found");
-        }
+        UserEntity user = getUserByIdOrThrow(id);
 
         UserResponse response = new UserResponse();
         response.setId(user.getId());
@@ -79,5 +53,44 @@ public class UserServiceImpl implements UserService {
         log.info("User found: {}", response.getEmail());
 
         return response;
+    }
+
+    @Override
+    public void deleteUserById(Long id) {
+        log.info("Delete user by id: {}", id);
+
+        getUserByIdOrThrow(id);
+
+        userRepository.deleteById(id);
+
+        log.info("User deleted");
+    }
+
+    @Override
+    public UserResponse updateUserById(Long id, UpdateUserRequest request) {
+        log.info("Update user by id: {}", id);
+
+        UserEntity user = getUserByIdOrThrow(id);
+
+        user.setFullName(request.getFullName());
+
+        userRepository.save(user);
+
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+
+        log.info("User updated: {}", response.getEmail());
+
+        return response;
+    }
+
+    private UserEntity getUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("User not found");
+                    return new RuntimeException("User not found");
+                });
     }
 }
